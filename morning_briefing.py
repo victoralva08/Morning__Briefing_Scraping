@@ -5,20 +5,20 @@ import pyshorteners
 # URL shortening function
 def shorten_url(url):
     s = pyshorteners.Shortener()
-    return s.tinyurl.short(url)
+    return s.tinyurl.short(url) # Aqui se obtem o URL encurtado da pagina de noticias fornecida como parametro
 
-def scrape_news_itatiaia(url):
-    url_position = url.find(".br") + 3
-    cropped_url = url[:url_position]
+def scrape_news_itatiaia(url, k):
+    url_position = url.find(".br") + 3 # Obtem o indice correspondente ao fim da url absoluta
+    cropped_url = url[:url_position] # Armazena a url absoluta, ex.: https://www.itatiaia.com.br
 
-    response = requests.get(url)
+    response = requests.get(url) # Requisicao de metodo GET feita para a url
 
-    if response.encoding is None or response.enconding == "ISO-8859-1":
+    if response.encoding is None or response.enconding == "ISO-8859-1": # condicional para validar se a resposta possui a encodificacao adequada
         response.encoding = response.apparent_encoding
     
-    soup = BeautifulSoup(response.content, 'html.parser') 
+    soup = BeautifulSoup(response.content, 'html.parser') # interpretacao do conteudo da resposta como HTML
 
-    news_links = soup.find_all('a', class_='jumbotron-default-link')
+    news_links = soup.find_all('a', class_='jumbotron-default-link') # selecao de todos os links da resposta (tag <a>), que sao armazenados na lista news_links
 
     news_data = []
 
@@ -29,9 +29,15 @@ def scrape_news_itatiaia(url):
         if href and href.startswith('/'):
             href = cropped_url + href  
 
-        news_data.append((title, href))
+        news_data.append((title, href)) 
+        
+        # para cada link da pagina (armazenados na lista news_links), armazena-se uma tupla na lista news_data. A tupla cntem o titulo da respectiva pagina e o href.
 
-    return news_data
+        if len(news_data) > k: # se a quantidade de noticias for maior do que o parametro k fornecido pelo usuario, interrompe o loop
+            break
+
+    
+    return news_data # retorna a lista de tuplas contendo as noticias
     
 
 def scrape_news_o_tempo(url):
@@ -71,19 +77,16 @@ def gather_news_o_tempo(news_sources):
 
 def gather_news_itatiaia(news_sources, k):
     
-    all_news, news = {}, []
+    all_news = {} # é declarado um dicionario que armazenara as noticias de acordo com suas categorias
     
-    for url, category in news_sources.items():
+    for url, category in news_sources.items(): # iteracao por cada item do dicionario news_sources_Itatiaia
 
-        if len(news) > k:
-            break
-
-        news = scrape_news_itatiaia(url)
+        news = scrape_news_itatiaia(url, k) # a variavel news recebe a lista de tuplas contendo o titulo e href da pagina da respectiva noticia. O parametro k corresponde a quantidade de noticias que o usuario deseja receber.
 
         if category not in all_news:
-            all_news[category] = []
+            all_news[category] = [] # se a categoria ainda nao existe no dicionario, ela eh adicionada
         
-        all_news[category].extend(news)
+        all_news[category].extend(news) # a lista referente a categoria recebe a noticia (tupla)
 
     return all_news
 
@@ -131,7 +134,8 @@ if __name__ == "__main__":
     }
 
     # all_news = gather_news_EM(news_sources_EM)
-    all_news = gather_news_itatiaia(news_sources_Itatiaia)
+    k = int(input("Quantidade de notícias: "))
+    all_news = gather_news_itatiaia(news_sources_Itatiaia, k)
     news_text = format_news(all_news)
     print(news_text)
 
