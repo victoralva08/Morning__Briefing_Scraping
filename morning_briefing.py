@@ -33,7 +33,7 @@ def scrape_news_itatiaia(url, k):
         
         # para cada link da pagina (armazenados na lista news_links), armazena-se uma tupla na lista news_data. A tupla cntem o titulo da respectiva pagina e o href.
 
-        if len(news_data) >= k: # se a quantidade de noticias for maior do que o parametro k fornecido pelo usuario, interrompe o loop
+        if len(news_data) >= k: # se a quantidade de noticias for maior/igual do que o parametro k fornecido pelo usuario, interrompe o loop
             break
 
     
